@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/zekeriyyah/lujay-autocity/pkg"
 	"github.com/zekeriyyah/lujay-autocity/pkg/types"
 
@@ -83,4 +84,18 @@ func (s *AuthService) Login(email, password string) (string, *models.User, error
 	}
 
 	return tokenString, user, nil
+}
+
+// GetUserProfile retrieves profile of already logged in user
+func (s *AuthService) GetUserProfile(userID uuid.UUID) (*models.User, error) {
+	
+	user, err := s.userRepo.GetByID(userID.String())
+	if err != nil {
+		return nil, err 
+	}
+
+	// avoid sharing password
+	user.Password = ""
+
+	return user, nil
 }

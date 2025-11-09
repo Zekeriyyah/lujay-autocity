@@ -5,6 +5,7 @@ import (
 	"github.com/zekeriyyah/lujay-autocity/internal/config"
 	"github.com/zekeriyyah/lujay-autocity/internal/database"
 	"github.com/zekeriyyah/lujay-autocity/internal/handlers"
+	"github.com/zekeriyyah/lujay-autocity/internal/middleware"
 	"github.com/zekeriyyah/lujay-autocity/internal/repositories"
 	"github.com/zekeriyyah/lujay-autocity/internal/services"
 )
@@ -35,9 +36,9 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 	r.POST("/auth/register", authHandler.Register) 
 	r.POST("/auth/login", authHandler.Login)
 
-	// // Protected routes (require authentication)
-	// protected := r.Group("/") // Create a group for protected routes
-	// protected.Use(middleware.Auth(cfg.JWTSecret)) // Apply Auth middleware to the group
+	// Protected routes (require authentication)
+	protected := r.Group("/")
+	protected.Use(middleware.AuthMiddleware()) 
 
 	// {
 	// 	// User profile route (accessible by any authenticated user)

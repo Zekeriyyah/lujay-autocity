@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/zekeriyyah/lujay-autocity/internal/middleware"
 	"github.com/zekeriyyah/lujay-autocity/internal/models"
 	"github.com/zekeriyyah/lujay-autocity/internal/services"
 	"github.com/zekeriyyah/lujay-autocity/pkg/types"
@@ -115,4 +116,26 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+
+// GetProfile handles GET /auth/profile
+func (h *AuthHandler) GetProfile(c *gin.Context) {
+	// Extract authenticated User ID from Gin context 
+	authUserID, ok := middleware.GetUserIDFromContext(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Call the service layer to get the user profile
+	user, err := h.service.GetUserProfile(authUserID)
+	if err != nil {
+		log.Printf("Error getting user profile: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get profile"})
+		return
+	}
+
+	
+	c.JSON(http.StatusOK, user)
 }

@@ -64,7 +64,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			return
 		}
 		// For other errors, return a generic message
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "registration failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "registration failed: "+ err.Error()})
 		return
 	}
 

@@ -12,12 +12,12 @@ import (
 
 
 type ListingService struct {
-	repo repositories.ListingRepositoryInterface
-	vehicleRepo repositories.VehicleRepositoryInterface
-	userRepo repositories.UserRepositoryInterface
+	repo *repositories.ListingRepository
+	vehicleRepo *repositories.VehicleRepository
+	userRepo *repositories.UserRepository
 }
 
-func NewListingService(repo repositories.ListingRepositoryInterface, vehicleRepo repositories.VehicleRepositoryInterface, userRepo repositories.UserRepositoryInterface) *ListingService {
+func NewListingService(repo *repositories.ListingRepository, vehicleRepo *repositories.VehicleRepository, userRepo *repositories.UserRepository) *ListingService {
 	return &ListingService{
 		repo: repo,
 		vehicleRepo: vehicleRepo,
@@ -32,37 +32,44 @@ func (s *ListingService) CreateListingWithVehicle(listing *models.Listing, vehic
 		return nil, fmt.Errorf("unauthorized: seller ID does not match authenticated user")
 	}
 
-	// Check if a vehicle with the same VIN already exists
-	existingVehicle, err := s.vehicleRepo.GetByVIN(vehicle.VIN)
-	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("error checking for existing vehicle: %w", err)
-		}
+	// using GORM's Transaction to handle operations on vehicle and listing in a roll
+	var createdListing *models.Listing
+	err := s.repo.DB.Transaction(func(tx *gorm.DB) error { 
 		
-		// Create vehicle
-		if err := s.vehicleRepo.Create(vehicle); err != nil {
-			return nil, fmt.Errorf("failed to create vehicle: %w", err)
+		// Check if vehicle of same vin exists to use it or create new one
+		existingVehicle := &models.Vehicle{}
+
+		existingVehicle, err := s.vehicleRepo.GetByVINWithTx(tx, vehicle.VIN)
+		if err != nil {
+			if !errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("error checking for existing vehicle: %w", err)
+			}
+			
+			if err := s.vehicleRepo.CreateWithTx(tx, vehicle); err != nil {
+				return fmt.Errorf("failed to create vehicle: %w", err)
+			}
+		
+		} else {
+			vehicle = existingVehicle 
 		}
-		// 'vehicle' now contains the ID of the newly created vehicle
-	} else {
-		// Vehicle with this VIN already exists, use its ID
-		vehicle = existingVehicle // Use the existing vehicle's data (including its ID)
+
+		// link the listing to the (newly created or existing) vehicle
+		listing.VehicleID = vehicle.ID
+		listing.Status = models.ListingStatusPending 
+
+		// create the listing within the same transaction
+		if err := s.repo.CreateWithTx(tx, listing); err != nil {
+			return fmt.Errorf("failed to create listing: %w", err)
+		}
+
+		createdListing = listing
+		return nil 
+	})
+
+	// handle error from transaction
+	if err != nil {
+		return nil, err
 	}
 
-	// 3. Link the listing to the (newly created or existing) vehicle
-	listing.VehicleID = vehicle.ID
-
-	// 4. Set initial status for the listing
-	listing.Status = models.ListingStatusPending // Default to pending review
-
-	// 5. Call the repository to persist the listing
-	if err := s.repo.Create(listing); err != nil {
-		// If listing creation fails, the vehicle might already be created,
-		// but that's acceptable for this workflow. Rolling back the vehicle creation
-		// would require a database transaction, which is more complex.
-		return nil, fmt.Errorf("failed to create listing: %w", err)
-	}
-
-	// 6. Return the successfully created listing
-	return listing, nil
+	return createdListing, nil
 }

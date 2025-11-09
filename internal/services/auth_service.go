@@ -3,7 +3,9 @@ package services
 import (
 	"errors"
 	"fmt"
+	"time"
 
+	"github.com/zekeriyyah/lujay-autocity/pkg"
 	"github.com/zekeriyyah/lujay-autocity/pkg/types"
 
 	"github.com/zekeriyyah/lujay-autocity/internal/models"
@@ -57,3 +59,28 @@ func (a *AuthService) Register(userData *models.User) error {
 
 	return nil
 } 
+
+
+// Login validates the user's credentials and returns a JWT token if successful.
+func (s *AuthService) Login(email, password string) (string, *models.User, error) {
+	// 1. Get user by email from the database
+	user, err := s.userRepo.GetByEmail(email)
+	if err != nil {
+		return "", nil, fmt.Errorf("invalid email or password")
+	}
+
+	// 2. Compare the provided password with the hashed password from the database
+	if  !user.VerifyPassword(password) {
+		return "", nil, fmt.Errorf("invalid email or password")
+	}
+
+	// 3. Generate JWT token upon successful authentication
+	expirationTime := time.Now().Add(24 * time.Hour)
+	
+	tokenString, err := pkg.GeneratJWT(user.ID, user.Role, expirationTime)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to generate token: %w", err)
+	}
+
+	return tokenString, user, nil
+}

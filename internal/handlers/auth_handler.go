@@ -78,3 +78,41 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		},
 	})
 }
+
+
+func (h *AuthHandler) Login(c *gin.Context) {
+	var input struct {
+		Email    string `json:"email" validate:"required,email"`
+		Password string `json:"password" validate:"required"`
+	}
+
+	// Bind JSON request to input struct
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON", "details": err.Error()})
+		return
+	}
+
+	if err := h.validator.Struct(input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Validation error", "details": err.Error()})
+		return
+	}
+
+	// Call the service layer to perform the login logic
+	token, user, err := h.service.Login(input.Email, input.Password)
+	if err != nil {
+		log.Printf("Error logging in user: %v", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user login failed: "+ err.Error()})
+		return
+	}
+
+
+	response := struct {
+		Token string       `json:"token"`
+		User  *models.User `json:"user"`
+	}{
+		Token: token,
+		User:  user,
+	}
+
+	c.JSON(http.StatusOK, response)
+}

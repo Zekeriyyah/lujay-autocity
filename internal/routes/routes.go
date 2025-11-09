@@ -33,7 +33,7 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 
 	// Public routes (no auth required)
 	r.POST("/auth/register", authHandler.Register) 
-	// r.POST("/auth/login", authHandler.Login)
+	r.POST("/auth/login", authHandler.Login)
 
 	// // Protected routes (require authentication)
 	// protected := r.Group("/") // Create a group for protected routes

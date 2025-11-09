@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/zekeriyyah/lujay-autocity/internal/config"
 	"github.com/zekeriyyah/lujay-autocity/internal/routes"
 	"github.com/zekeriyyah/lujay-autocity/pkg"
 )
@@ -12,7 +13,13 @@ import (
 func main() {
 	r := gin.Default()
 
-	r = routes.Setup(r)
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		pkg.Error(err, "failed to load configurations")
+		return
+	}
+
+	r = routes.SetupRouter(r, cfg)
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {

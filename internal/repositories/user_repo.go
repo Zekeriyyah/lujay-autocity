@@ -45,6 +45,10 @@ func (u *UserRepository) Create(user *models.User) error {
 
 func (u *UserRepository) GetByEmail(email string) (*models.User, error) {
 
+	if u.db == nil {
+        return nil, errors.New("database connection is not initialized")
+    }
+
 	user := models.User{}
 
 	if err := u.db.Where("email = ?", email).First(&user).Error; err != nil {

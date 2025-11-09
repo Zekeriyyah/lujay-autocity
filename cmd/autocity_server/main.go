@@ -5,12 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/zekeriyyah/lujay-autocity/internal/config"
+	"github.com/zekeriyyah/lujay-autocity/internal/database"
 	"github.com/zekeriyyah/lujay-autocity/internal/routes"
 	"github.com/zekeriyyah/lujay-autocity/pkg"
 )
 
 
 func main() {
+
 	r := gin.Default()
 
 	cfg, err := config.LoadConfig()
@@ -18,6 +20,11 @@ func main() {
 		pkg.Error(err, "failed to load configurations")
 		return
 	}
+
+	if os.Getenv("RENDER") == "true" {
+		database.InitDB(cfg.DatabaseURL)
+	}
+	
 
 	r = routes.SetupRouter(r, cfg)
 

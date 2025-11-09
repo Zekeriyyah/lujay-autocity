@@ -93,7 +93,7 @@ func (v *VehicleRepository) GetByVINWithTx(tx *gorm.DB, vin string) (*models.Veh
 	
 	if err := tx.Where("vin = ?", vin).First(vehicle).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("vehicle with VIN %s not found", vin)
+			return nil, err
 		}
 		return nil, fmt.Errorf("failed to get vehicle by VIN: %w", err)
 	}

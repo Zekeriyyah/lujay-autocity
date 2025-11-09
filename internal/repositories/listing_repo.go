@@ -33,7 +33,7 @@ func NewListingRepository(db *gorm.DB) *ListingRepository {
 // Create: inserts a listing into the db
 func (r *ListingRepository) Create(listing *models.Listing) error {
 	if err := r.db.Create(listing).Error; err != nil {
-		return fmt.Errorf("❌ failed to create listing: %w", err)
+		return fmt.Errorf("failed to create listing: %w", err)
 	}
 	return nil
 }
@@ -51,7 +51,7 @@ func (r *ListingRepository) GetByID(id string) (*models.Listing, error) {
 	// Preload Seller, Vehicle and Image
 	if err := r.db.Preload("Seller").Preload("Vehicle").Preload("Images").First(listing, "id = ?", parsedID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("❌ listing with id %s not found", id)
+			return nil, fmt.Errorf("listing with id %s not found", id)
 		}
 		return nil, fmt.Errorf("failed to get listing: %w", err)
 	}
@@ -62,10 +62,10 @@ func (r *ListingRepository) GetByID(id string) (*models.Listing, error) {
 func (r *ListingRepository) Update(listing *models.Listing) error {
 	result := r.db.Save(listing)
 	if result.Error != nil {
-		return fmt.Errorf("❌ failed to update listing: %w", result.Error)
+		return fmt.Errorf("failed to update listing: %w", result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("❌ listing with id %s not found", listing.ID.String()) 
+		return fmt.Errorf("listing with id %s not found", listing.ID.String()) 
 	}
 	
 	return nil
@@ -80,10 +80,10 @@ func (r *ListingRepository) Delete(id string) error {
 
 	result := r.db.Delete(&models.Listing{}, "id = ?", parsedID) 
 	if result.Error != nil {
-		return fmt.Errorf("❌ failed to delete listing: %w", result.Error)
+		return fmt.Errorf("failed to delete listing: %w", result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("❌ listing with id %s not found", id)
+		return fmt.Errorf("listing with id %s not found", id)
 	}
 	
 	return nil
@@ -93,13 +93,13 @@ func(r *ListingRepository) GetBySellerID(id string) ([]*models.Listing, error) {
 	
 	parseSellerID, err := pkg.StringToUUID(id) 
 	if err != nil {
-		return nil, fmt.Errorf("❌ failed to parse seller id to uuid: %w", err)
+		return nil, fmt.Errorf("failed to parse seller id to uuid: %w", err)
 	}
 	
 	listings := []*models.Listing{}
 
 	if err = r.db.Where("seller_id = ?", parseSellerID).Preload("Vehicle").Preload("Images").Find(&listings).Error; err != nil {
-		return nil, fmt.Errorf("❌ failed to get listings by seller ID: %w", err)
+		return nil, fmt.Errorf("failed to get listings by seller ID: %w", err)
 	}
 
 	return listings, nil
@@ -111,7 +111,7 @@ func(r *ListingRepository) GetAll() ([]*models.Listing, error) {
 
 	err := r.db.Preload("Seller").Preload("Vehicle").Preload("Images").Find(&listings).Error
 	if err != nil {
-		return nil, fmt.Errorf("❌ failed to get all listings: %w", err)
+		return nil, fmt.Errorf("failed to get all listings: %w", err)
 	}
 	return listings, nil
 }
@@ -121,7 +121,7 @@ func (r *ListingRepository) GetByStatus(status models.ListingStatus) ([]*models.
 
 	err := r.db.Where("status=?", status).Preload("Seller").Preload("Vehicle").Preload("Images").Find(&listings).Error
 	if err != nil {
-		return nil, fmt.Errorf("❌ failed to get %s listings: %w", status, err) 
+		return nil, fmt.Errorf("failed to get %s listings: %w", status, err) 
 	}
 	return listings, nil
 }

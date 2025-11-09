@@ -11,10 +11,12 @@ import (
 
 type VehicleRepositoryInterface interface {
 	Create(vehicle *models.Vehicle) error
+	CreateWithTx(tx *gorm.DB, vehicle *models.Vehicle)
 	GetByID(id string) (*models.Vehicle, error)
 	Update(vehicle *models.Vehicle) error
 	Delete(id string) error
 	GetByVIN(vin string) (*models.Vehicle, error)
+	GetByVINWithTx(tx *gorm.DB, vin string) (*models.Vehicle, error)
 }
 
 
@@ -27,8 +29,12 @@ func NewVehicleRepository(db *gorm.DB) *VehicleRepository{
 }
 
 func(v *VehicleRepository) Create(vehicle *models.Vehicle) error {
-	if err := v.db.Create(vehicle).Error; err != nil {
-		return fmt.Errorf("failed to create vehicl: %w", err)
+	return v.CreateWithTx(v.db, vehicle)
+}
+
+func(v *VehicleRepository) CreateWithTx(tx *gorm.DB, vehicle *models.Vehicle) error {
+	if err := tx.Create(vehicle).Error; err != nil {
+		return fmt.Errorf("failed to create vehicle: %w", err)
 	}
 	return nil
 }
@@ -78,10 +84,14 @@ func(v *VehicleRepository) Delete(id string) error {
 }
 
 func (v *VehicleRepository) GetByVIN(vin string) (*models.Vehicle, error) {
+	return v.GetByVINWithTx(v.db, vin)
+}
+
+func (v *VehicleRepository) GetByVINWithTx(tx *gorm.DB, vin string) (*models.Vehicle, error) {
 	
 	vehicle := &models.Vehicle{}
 	
-	if err := v.db.Where("vin = ?", vin).First(vehicle).Error; err != nil {
+	if err := tx.Where("vin = ?", vin).First(vehicle).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("vehicle with VIN %s not found", vin)
 		}
@@ -89,4 +99,3 @@ func (v *VehicleRepository) GetByVIN(vin string) (*models.Vehicle, error) {
 	}
 	return vehicle, nil
 }
-

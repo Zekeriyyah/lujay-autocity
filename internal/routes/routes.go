@@ -8,19 +8,24 @@ import (
 	"github.com/zekeriyyah/lujay-autocity/internal/middleware"
 	"github.com/zekeriyyah/lujay-autocity/internal/repositories"
 	"github.com/zekeriyyah/lujay-autocity/internal/services"
+	"github.com/zekeriyyah/lujay-autocity/pkg/types"
 )
 
 func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 
 	// Initialize repositories
 	userRepo := repositories.NewUserRepository(database.DB)
+	listingRepo := repositories.NewListingRepository(database.DB)
+	vehicleRepo := repositories.NewVehicleRepository(database.DB)
 
 
 	// Initialize services
-	authService := services.NewAuthService(userRepo, cfg.JWTSecret)
+	authService := services.NewAuthService(userRepo)
+	listingService := services.NewListingService(listingRepo, vehicleRepo, userRepo)
 
 	// Initialize Handler
 	authHandler := handlers.NewAuthHandler(authService)
+	listingHandler := handlers.NewListingHandler(listingService)
 
 
 
@@ -43,6 +48,14 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 	{
 		// User profile route (accessible by any authenticated user)
 		protected.GET("/auth/profile", authHandler.GetProfile)
+
+		// Seller-specific routes 
+		sellerRoutes := protected.Group("/")
+		sellerRoutes.Use(middleware.RBAC(types.RoleSeller))
+		{
+			sellerRoutes.POST("/listings", listingHandler.CreateListing)
+
+		}
 
 	return r
 	}

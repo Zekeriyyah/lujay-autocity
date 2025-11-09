@@ -9,7 +9,6 @@ import (
 type ListingStatus string
 
 const (
-	ListingStatusDraft       ListingStatus = "draft"
 	ListingStatusPending     ListingStatus = "pending_review"
 	ListingStatusActive      ListingStatus = "active"
 	ListingStatusRejected    ListingStatus = "rejected"
@@ -23,7 +22,7 @@ type Listing struct {
 	Description string        `json:"description,omitempty" gorm:"type:text"`
 	Price       float64       `json:"price" gorm:"not null;comment:Asking price in local currency"`
 	Location    string        `json:"location" gorm:"size:255;not null"`
-	Status      ListingStatus `json:"status" gorm:"default:draft;not null"`
+	Status      ListingStatus `json:"status" gorm:"default:pending_review;not null"`
 	CreatedAt   time.Time     `json:"created_at"`
 	UpdatedAt   time.Time     `json:"updated_at"`
 

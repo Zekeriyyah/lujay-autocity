@@ -38,8 +38,10 @@ func (a *AuthService) Register(userData *models.User) error {
 
 	
 	// Check if role is NOT admin AND NOT seller - set to default buyer if true
-	if userData.Role != types.RoleAdmin && userData.Role != types.RoleSeller {
+	if userData.Role == "" {
 		userData.Role = types.RoleBuyer
+	} else if userData.Role != types.RoleAdmin && userData.Role != types.RoleSeller && userData.Role != types.RoleBuyer {
+		return fmt.Errorf("invalid role type specified")
 	}
 
 	// hash password and set it

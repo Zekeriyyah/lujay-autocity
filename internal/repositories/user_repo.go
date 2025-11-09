@@ -45,15 +45,15 @@ func (u *UserRepository) Create(user *models.User) error {
 
 func (u *UserRepository) GetByEmail(email string) (*models.User, error) {
 
-	user := &models.User{}
+	user := models.User{}
 
-	if err := u.db.Where("email = ?", email).First(user).Error; err != nil {
+	if err := u.db.Where("email = ?", email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("user with email %s not found", email)
 		}
 		return nil, fmt.Errorf("failed to get user by email: %w", err)
 	}
-	return user, nil
+	return &user, nil
 }
 
 
@@ -63,13 +63,13 @@ func (u *UserRepository) GetByID(id string) (*models.User, error) {
 		return nil, err
 	}
 
-	user := &models.User{}
-	if err := u.db.First(user, "id = ?", parsedID).Error; err != nil {
+	user := models.User{}
+	if err := u.db.First(&user, "id = ?", parsedID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("user with id %s not found", id)
 		}
 		return nil, fmt.Errorf("failed to get user by ID: %w", err)
 	}
-	return user, nil
+	return &user, nil
 }
 

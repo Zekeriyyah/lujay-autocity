@@ -8,18 +8,19 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/zekeriyyah/lujay-autocity/pkg/types"
 )
 
 var secret_key = []byte(os.Getenv("JWT_SECRET"))
 
 type Claims struct {
 	UserID  uuid.UUID   `json:"user_id"`
-	Role	string	`json:"role"`
+	Role	types.Role	`json:"role"`
 	Purpose string `json:"purpose"`
 	jwt.RegisteredClaims
 }
 
-func GeneratJWT(userID uuid.UUID, role string, t time.Time) (string, error) {
+func GeneratJWT(userID uuid.UUID, role types.Role, t time.Time) (string, error) {
 	claims := Claims{
 		UserID:  userID,
 		Role:	 role,

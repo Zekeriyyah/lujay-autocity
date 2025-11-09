@@ -7,19 +7,22 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 var secret_key = []byte(os.Getenv("JWT_SECRET"))
 
 type Claims struct {
-	UserID  uint   `json:"user_id"`
+	UserID  uuid.UUID   `json:"user_id"`
+	Role	string	`json:"role"`
 	Purpose string `json:"purpose"`
 	jwt.RegisteredClaims
 }
 
-func GeneratJWT(userID uint, t time.Time) (string, error) {
+func GeneratJWT(userID uuid.UUID, role string, t time.Time) (string, error) {
 	claims := Claims{
 		UserID:  userID,
+		Role:	 role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(t),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -37,8 +40,6 @@ func ValidateJWT(tokenStr string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
-
-	// Check for parsing errors
 	if err != nil {
 		Info(tokenStr)
 		Error(err, "error parsing token")
@@ -60,14 +61,11 @@ func ExtractTokenStr(tokenHeader string) (string, error) {
 
 	tokenHeader = strings.TrimSpace(tokenHeader)
 	tokenSlice := strings.SplitN(tokenHeader, " ", 2)
-		if tokenHeader == "" {
-			return "", fmt.Errorf("missing token")
-		}
+		
+	if len(tokenSlice) != 2 || tokenSlice[1] == "" {
+		return "", fmt.Errorf("invalid token: bearer-token required")
+	}
 
-		if len(tokenSlice) != 2 || tokenSlice[1] == "" {
-			return "", fmt.Errorf("invalid token")
-		}
-
-		token := tokenSlice[1]
-		return token, nil
+	token := tokenSlice[1]
+	return token, nil
 }

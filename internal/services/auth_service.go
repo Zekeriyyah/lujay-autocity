@@ -33,13 +33,14 @@ func (a *AuthService) Register(userData *models.User) error {
 	
 	// for errors other than RecordNotFound
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		return fmt.Errorf("error checking for existing email")
+		return fmt.Errorf("error checking for existing email: %w", err)
 	}
+
 	
-// Check if role is NOT admin AND NOT seller - set to default buyer if true
-if userData.Role != types.RoleAdmin && userData.Role != types.RoleSeller {
-    userData.Role = types.RoleBuyer
-}
+	// Check if role is NOT admin AND NOT seller - set to default buyer if true
+	if userData.Role != types.RoleAdmin && userData.Role != types.RoleSeller {
+		userData.Role = types.RoleBuyer
+	}
 
 	// hash password and set it
 	err = userData.SetPassword(userData.Password)

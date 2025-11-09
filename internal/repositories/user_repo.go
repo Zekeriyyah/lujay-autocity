@@ -52,10 +52,7 @@ func (u *UserRepository) GetByEmail(email string) (*models.User, error) {
 	user := models.User{}
 
 	if err := u.db.Where("email = ?", email).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("user with email %s not found", email)
-		}
-		return nil, fmt.Errorf("failed to get user by email: %w", err)
+		return nil, err
 	}
 	return &user, nil
 }

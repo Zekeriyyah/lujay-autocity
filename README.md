@@ -179,12 +179,11 @@ erDiagram
 ### Steps
 
 1. **Clone the repo**
+
    ```bash
    git clone https://github.com/your-username/autocity.git # Replace with your actual repo URL
    cd autocity
    ```
-
-````
 
 2. **Install dependencies**
 
@@ -395,4 +394,5 @@ This implementation is **production-ready**, **well-documented**, and **fully al
 © 2025 Lujay Auto — AutoCity Backend | Built with ❤️ using Go
 
 ```
-````
+
+```

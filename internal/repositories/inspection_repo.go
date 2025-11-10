@@ -15,17 +15,18 @@ type InspectionRepositoryInterface interface {
 	GetByStatus(status models.InspectionStatus) ([]*models.Inspection, error)
 	GetByListingID(listingID string) (*models.Inspection, error) 
 	Update(inspection *models.Inspection) error
+	UpdateWithTx(tx *gorm.DB, inspection *models.Inspection) error
 	Delete(id string) error 
 }
 
 // InspectionRepository implements the InspectionRepositoryInterface.
 type InspectionRepository struct {
-	db *gorm.DB
+	DB *gorm.DB
 }
 
 // NewInspectionRepository creates a new instance of InspectionRepository.
 func NewInspectionRepository(db *gorm.DB) *InspectionRepository {
-	return &InspectionRepository{db: db}
+	return &InspectionRepository{DB: db}
 }
 
 
@@ -33,7 +34,7 @@ func NewInspectionRepository(db *gorm.DB) *InspectionRepository {
 func (r *InspectionRepository) GetByStatus(status models.InspectionStatus) ([]*models.Inspection, error) {
 	inspections := []*models.Inspection{}
 	// Preload related data (Listing, Inspector)
-	if err := r.db.Preload("Listing").Preload("Inspector").Where("status = ?", status).Find(&inspections).Error; err != nil {
+	if err := r.DB.Preload("Listing").Preload("Inspector").Where("status = ?", status).Find(&inspections).Error; err != nil {
 		return nil, fmt.Errorf("failed to get inspections by status: %w", err)
 	}
 	return inspections, nil
@@ -48,7 +49,7 @@ func (i *InspectionRepository) GetByListingID(listingID string) (*models.Inspect
 
 	inspection := &models.Inspection{}
 
-	if err := i.db.Preload("Listing").Preload("Inspector").First(inspection, "listing_id = ?", parsedListingID).Error; err != nil {
+	if err := i.DB.Preload("Listing").Preload("Inspector").First(inspection, "listing_id = ?", parsedListingID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("inspection for listing ID %s not found", listingID)
 		}
@@ -59,8 +60,13 @@ func (i *InspectionRepository) GetByListingID(listingID string) (*models.Inspect
 
 // Update updates an existing inspection.
 func (i *InspectionRepository) Update(inspection *models.Inspection) error {
+	return i.UpdateWithTx(i.DB, inspection)
+}
+
+// UpdateWithTx updates an existing inspection within an ongoing transaction
+func(i *InspectionRepository) UpdateWithTx(tx *gorm.DB, inspection *models.Inspection) error {
 	
-	result := i.db.Save(inspection) 
+	result := tx.Save(inspection) 
 	if result.Error != nil {
 		return fmt.Errorf("failed to update inspection: %w", result.Error)
 	}
@@ -77,7 +83,7 @@ func (i *InspectionRepository) Delete(id string) error {
 		return err
 	}
 
-	result := i.db.Delete(&models.Inspection{}, "id = ?", parsedID) 
+	result := i.DB.Delete(&models.Inspection{}, "id = ?", parsedID) 
 	if result.Error != nil {
 		return fmt.Errorf("failed to delete inspection: %w", result.Error)
 	}
@@ -95,7 +101,7 @@ func (r *InspectionRepository) GetByID(id string) (*models.Inspection, error) {
 
 	inspection := models.Inspection{}
 
-	if err := r.db.Preload("Listing").Preload("Inspector").First(&inspection, "id = ?", parsedID).Error; err != nil {
+	if err := r.DB.Preload("Listing").Preload("Inspector").First(&inspection, "id = ?", parsedID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("inspection with id %s not found", id)
 		}

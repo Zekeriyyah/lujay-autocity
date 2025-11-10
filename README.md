@@ -79,132 +79,91 @@ autocity/
 
 The database schema is designed to support vehicle listings, user profiles, transactions, and vehicle inspections, demonstrating understanding of relationships, indexing, data normalization, and scalability as required by the assessment guide.
 
-### **Tables**
+erDiagram
+    USER ||--o{ LISTING : "creates"
+    USER ||--o{ TRANSACTION : "buys"
+    USER ||--o{ INSPECTION : "performs"
 
-#### `users`
-Stores user profile information.
+    VEHICLE ||--o{ LISTING : "is_listed_as"
 
-| Column Name | Data Type | Constraints | Description |
-|-------------|-----------|-------------|-------------|
-| `id` | `uuid` | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique identifier for the user. |
-| `email` | `varchar(255)` | `UNIQUE`, `NOT NULL` | User's email address. |
-| `name` | `varchar(255)` | `NOT NULL` | User's full name. |
-| `phone` | `varchar(20)` | | User's phone number. |
-| `password` | `varchar(255)` | `NOT NULL` | Hashed password. |
-| `role` | `text` | `NOT NULL`, `DEFAULT 'buyer'` | User's role (`admin`, `seller`, `buyer`). |
-| `created_at` | `timestamptz` | `NOT NULL` | Timestamp of user creation. |
-| `updated_at` | `timestamptz` | `NOT NULL` | Timestamp of last update. |
+    LISTING ||--|| INSPECTION : "has"
+    LISTING ||--|| TRANSACTION : "results_in"
+    LISTING ||--o{ IMAGE : "has"
 
-*Indexes:*
-* `idx_users_email` on `email` (Unique)
+    USER {
+        uuid id PK
+        varchar(255) email UK
+        varchar(255) name
+        varchar(20) phone
+        varchar(255) password
+        text role
+        timestamptz created_at
+        timestamptz updated_at
+    }
 
----
+    VEHICLE {
+        uuid id PK
+        varchar(17) vin UK
+        varchar(100) make
+        varchar(100) model
+        integer year
+        integer mileage
+        varchar(20) engine_size
+        varchar(50) fuel_type
+        varchar(50) transmission
+        varchar(50) body_type
+        varchar(50) color
+        varchar(20) condition
+        timestamptz created_at
+        timestamptz updated_at
+    }
 
-#### `vehicles`
-Stores core vehicle data.
+    LISTING {
+        uuid id PK
+        varchar(255) title
+        text description
+        decimal price
+        varchar(255) location
+        text status
+        timestamptz created_at
+        timestamptz updated_at
+        uuid seller_id FK
+        uuid vehicle_id FK
+    }
 
-| Column Name | Data Type | Constraints | Description |
-|-------------|-----------|-------------|-------------|
-| `id`        | `uuid`    | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique identifier for the vehicle. |
-| `vin` | `varchar(17)` | `UNIQUE` | Vehicle Identification Number. |
-| `make` | `varchar(100)` | `NOT NULL` | Vehicle make (e.g., Toyota). |
-| `model` | `varchar(100)` | `NOT NULL` | Vehicle model (e.g., Camry). |
-| `year` | `integer` | `NOT NULL` | Vehicle year of manufacture. |
-| `mileage` | `integer` | | Odometer reading. |
-| `engine_size` | `varchar(20)` | | Engine size (e.g., 2.0L). |
-| `fuel_type` | `varchar(50)` | | Fuel type (e.g., Gasoline, Diesel). |
-| `transmission` | `varchar(50)` | | Transmission type (e.g., Automatic, Manual). |
-| `body_type` | `varchar(50)` | | Body type (e.g., Sedan, SUV). |
-| `color` | `varchar(50)` | | Vehicle color. |
-| `condition` | `varchar(20)` | | Vehicle condition (e.g., New, Used). |
-| `created_at` | `timestamptz` | `NOT NULL` | Timestamp of vehicle record creation. |
-| `updated_at` | `timestamptz` | `NOT NULL` | Timestamp of last update. |
+    INSPECTION {
+        uuid id PK
+        timestamptz inspection_date
+        integer condition_rating
+        jsonb findings
+        varchar(500) report_url
+        text status
+        timestamptz created_at
+        timestamptz updated_at
+        uuid listing_id FK "UNIQUE"
+        uuid inspector_id FK
+    }
 
-*Indexes:*
-* `idx_vehicles_vin` on `vin` (Unique)
+    TRANSACTION {
+        uuid id PK
+        decimal amount
+        varchar(100) payment_method
+        text status
+        timestamptz transaction_date
+        timestamptz created_at
+        timestamptz updated_at
+        uuid listing_id FK "UNIQUE"
+        uuid buyer_id FK
+        uuid seller_id FK
+    }
 
----
-
-#### `listings`
-Represents a specific listing of a vehicle on the platform.
-
-| Column Name | Data Type | Constraints | Description |
-|-------------|-----------|-------------|-------------|
-| `id` | `uuid` | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique identifier for the listing. |
-| `title` | `varchar(255)` | `NOT NULL` | Listing title. |
-| `description` | `text` | | Detailed description of the vehicle. |
-| `price` | `decimal` | `NOT NULL` | Asking price. |
-| `location` | `varchar(255)` | `NOT NULL` | Location of the vehicle. |
-| `status` | `text` | `NOT NULL`, `DEFAULT 'pending_review'` | Listing status (`pending_review`, `active`, `rejected`, `sold`). |
-| `seller_id` | `uuid` | `NOT NULL`, `REFERENCES users(id)` | Foreign key to the user who created the listing. |
-| `vehicle_id` | `uuid` | `NOT NULL`, `REFERENCES vehicles(id)` | Foreign key to the vehicle being listed. |
-| `created_at` | `timestamptz` | `NOT NULL` | Timestamp of listing creation. |
-| `updated_at` | `timestamptz` | `NOT NULL` | Timestamp of last update. |
-
-*Indexes:*
-* `idx_listings_seller` on `seller_id`
-* `idx_listings_vehicle` on `vehicle_id`
-
----
-
-#### `inspections`
-Represents the vetting report for a listed vehicle.
-
-| Column Name | Data Type | Constraints | Description |
-|-------------|-----------|-------------|-------------|
-| `id` | `uuid` | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique identifier for the inspection. |
-| `listing_id` | `uuid` | `UNIQUE`, `NOT NULL`, `REFERENCES listings(id)` | Foreign key to the listing being inspected. |
-| `inspector_id` | `uuid` | `NOT NULL`, `REFERENCES users(id)` | Foreign key to the user who performed the inspection. |
-| `inspection_date` | `timestamptz` | | Date the inspection was performed. |
-| `condition_rating` | `integer` | | Overall condition score (e.g., 1-10). |
-| `findings` | `jsonb` | | Detailed inspection notes (e.g., dents, scratches, mechanical issues). |
-| `report_url` | `varchar(500)` | | Link to the full inspection report PDF/image. |
-| `status` | `text` | `NOT NULL`, `DEFAULT 'pending'` | Inspection status (`pending`, `approved`, `rejected`). |
-| `created_at` | `timestamptz` | `NOT NULL` | Timestamp of inspection record creation. |
-| `updated_at` | `timestamptz` | `NOT NULL` | Timestamp of last update. |
-
-*Indexes:*
-* `idx_inspections_listing` on `listing_id` (Unique)
-* `idx_inspections_inspector` on `inspector_id`
-
----
-
-#### `transactions`
-Captures the sale/purchase process for a vehicle.
-
-| Column Name | Data Type | Constraints | Description |
-|-------------|-----------|-------------|-------------|
-| `id` | `uuid` | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique identifier for the transaction. |
-| `listing_id` | `uuid` | `UNIQUE`, `NOT NULL`, `REFERENCES listings(id)` | Foreign key to the sold listing. |
-| `buyer_id` | `uuid` | `NOT NULL`, `REFERENCES users(id)` | Foreign key to the user who bought the vehicle. |
-| `seller_id` | `uuid` | `NOT NULL`, `REFERENCES users(id)` | Foreign key to the user who sold the vehicle (denormalized for history). |
-| `amount` | `decimal` | `NOT NULL` | Final sale price. |
-| `payment_method` | `varchar(100)` | | Payment method used. |
-| `status` | `text` | `NOT NULL`, `DEFAULT 'pending'` | Transaction status (`pending`, `completed`, `failed`, `cancelled`). |
-| `transaction_date` | `timestamptz` | | Date the transaction was completed. |
-| `created_at` | `timestamptz` | `NOT NULL` | Timestamp of transaction record creation. |
-| `updated_at` | `timestamptz` | `NOT NULL` | Timestamp of last update. |
-
-*Indexes:*
-* `idx_transactions_listing` on `listing_id` (Unique)
-* `idx_transactions_buyer` on `buyer_id`
-* `idx_transactions_seller` on `seller_id`
-
----
-
-#### `images`
-Stores image files associated with a listing.
-
-| Column Name | Data Type | Constraints | Description |
-|-------------|-----------|-------------|-------------|
-| `id` | `uuid` | `PRIMARY KEY`, `DEFAULT gen_random_uuid()` | Unique identifier for the image. |
-| `listing_id` | `uuid` | `NOT NULL`, `REFERENCES listings(id)` | Foreign key to the listing the image belongs to. |
-| `url` | `varchar(500)` | `NOT NULL` | Public URL of the image (e.g., from S3/Cloudinary). |
-| `order` | `integer` | `DEFAULT 0` | Display order for the image gallery. |
-| `created_at` | `timestamptz` | `NOT NULL` | Timestamp of image record creation. |
-
-*Indexes:*
-* `idx_images_listing` on `listing_id`
+    IMAGE {
+        uuid id PK
+        varchar(500) url
+        integer order
+        timestamptz created_at
+        uuid listing_id FK
+    }
 
 ---
 

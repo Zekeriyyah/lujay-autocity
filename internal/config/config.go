@@ -10,7 +10,9 @@ import (
 type Config struct {
     DatabaseURL string
     JWTSecret   string
-    // Add other config variables as needed
+    CloudinaryCloudName string
+	CloudinaryAPIKey    string
+	CloudinaryAPISecret string
 }
 
 func LoadConfig() (*Config, error) {
@@ -22,6 +24,9 @@ func LoadConfig() (*Config, error) {
     return &Config{
         DatabaseURL: getEnv("DATABASE_URL", "postgresql://autocity_user:x0bHy2QL75QdSmmXBCz0h6IaCEKFZYS1@dpg-d47dg64hg0os73fju09g-a.oregon-postgres.render.com/autocity_db_cecf"),
         JWTSecret:   getEnv("JWT_SECRET", "!@#$%^&*()"),
+        CloudinaryCloudName: getEnv("CLOUDINARY_CLOUD_NAME", ""),
+		CloudinaryAPIKey:    getEnv("CLOUDINARY_API_KEY", ""),    
+		CloudinaryAPISecret: getEnv("CLOUDINARY_API_SECRET", ""), 
     }, nil
 }
 

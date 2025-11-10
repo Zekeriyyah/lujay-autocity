@@ -79,6 +79,7 @@ autocity/
 
 The database schema is designed to support vehicle listings, user profiles, transactions, and vehicle inspections, demonstrating understanding of relationships, indexing, data normalization, and scalability as required by the assessment guide.
 
+```mermaid
 erDiagram
     USER ||--o{ LISTING : "creates"
     USER ||--o{ TRANSACTION : "buys"
@@ -164,7 +165,7 @@ erDiagram
         timestamptz created_at
         uuid listing_id FK
     }
-
+```
 ---
 
 ## 🚀 Setup & Run Locally

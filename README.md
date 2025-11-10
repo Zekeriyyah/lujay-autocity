@@ -1,4 +1,3 @@
-```markdown
 # 🚗 AutoCity Backend — Lujay Auto Technical Assessment
 
 > _Simplifying global automotive experiences through technology._
@@ -44,6 +43,7 @@ This service handles vehicle listings, user authentication, inspection workflows
 ---
 
 ## 📁 Project Structure
+
 ```
 
 autocity/
@@ -67,7 +67,7 @@ autocity/
 └── docs/
 └── AutoCity_Postman_Collection.json # Import into Postman
 
-````
+```
 
 > ✅ All code follows **Hexagonal Architecture** — business logic is decoupled from frameworks and databases.
 
@@ -165,6 +165,7 @@ erDiagram
     }
 
 ```
+
 ---
 
 ## 🚀 Setup & Run Locally
@@ -181,6 +182,8 @@ erDiagram
    ```bash
    git clone https://github.com/your-username/autocity.git # Replace with your actual repo URL
    cd autocity
+   ```
+
 ````
 
 2. **Install dependencies**
@@ -294,8 +297,8 @@ We’ve included a **Postman Collection** for easy testing. Import it into Postm
 | `GET`  | `/inspections/:id` | Get inspection details                                                                                     | Admin |
 | `PUT`  | `/inspections/:id` | Update inspection status → triggers listing status update (`approved` → `active`, `rejected` → `rejected`) | Admin |
 
-> 💡 **Workflow Trigger**:  
-> When Admin sets `inspection.status = approved` → `listing.status = active`  
+> 💡 **Workflow Trigger**:
+> When Admin sets `inspection.status = approved` → `listing.status = active`
 > When Admin sets `inspection.status = rejected` → `listing.status = rejected`
 
 ---
@@ -338,7 +341,7 @@ Use `make` to streamline development:
 | `make tidy`  | Clean and update `go.mod` and `go.sum`     |
 | `make clean` | Remove build artifacts                     |
 
-> 💡 Add `GOTEST=1` to run tests with verbose output:  
+> 💡 Add `GOTEST=1` to run tests with verbose output:
 > `make test GOTEST=1`
 
 ---
@@ -392,5 +395,4 @@ This implementation is **production-ready**, **well-documented**, and **fully al
 © 2025 Lujay Auto — AutoCity Backend | Built with ❤️ using Go
 
 ```
-
-```
+````

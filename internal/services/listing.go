@@ -126,7 +126,6 @@ func (s *ListingService) UpdateListing(listingToUpdate *models.Listing, authenti
 		listingToUpdate.SellerID = existingListing.SellerID 
 		listingToUpdate.VehicleID = existingListing.VehicleID 
 		
-
 	default:
 		return fmt.Errorf("unauthorized: invalid role for update operation")
 	}

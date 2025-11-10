@@ -448,7 +448,7 @@ Use `make` to streamline development:
 
 ## 📎 Documentation & Resources
 
-- [Postman Collection](docs/AutoCity_Postman_Collection.json) — Import to test all endpoints
+- [Postman Collection](https://documenter.getpostman.com/view/29195129/2sB3WtsJYo) - Access to test the Endpoints
 - [Go Documentation](https://pkg.go.dev/)
 - [Gin Framework](https://gin-gonic.com/)
 - [GORM Docs](https://gorm.io/)

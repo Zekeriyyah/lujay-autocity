@@ -112,7 +112,7 @@ func (h *InspectionHandler) UpdateInspection(c *gin.Context) {
 	}
 
 	type UpdateInspectionInput struct {
-	Status models.InspectionStatus `json:"status" validate:"required,oneof=pending approved rejected"`
+		Status models.InspectionStatus `json:"status" validate:"required,oneof=pending approved rejected"`
 	}
 
 	// Parse JSON request body into input

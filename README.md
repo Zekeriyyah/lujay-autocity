@@ -165,6 +165,7 @@ erDiagram
         timestamptz created_at
         uuid listing_id FK
     }
+
 ```
 ---
 

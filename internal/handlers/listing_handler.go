@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"github.com/zekeriyyah/lujay-autocity/internal/middleware"
 	"github.com/zekeriyyah/lujay-autocity/internal/models"
 	"github.com/zekeriyyah/lujay-autocity/internal/services"
+	"gorm.io/gorm"
 )
 
 type ListingHandler struct {
@@ -87,6 +89,29 @@ func (h *ListingHandler) CreateListing(c *gin.Context) {
 	c.JSON(http.StatusCreated, createdListing)
 }
 
+// GetListingByID handles GET /listings/{id} (Admin only)
+func (h *ListingHandler) GetListingByID(c *gin.Context) {
+    idStr := c.Param("id")
+    _, err := uuid.Parse(idStr)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid listing ID format"})
+        return
+    }
+
+	// invoke service layer to perform the get logic (admin-specific)
+    listing, err := h.service.GetListingByID(idStr)
+    if err != nil {
+        log.Printf("Error getting listing %s: %v", idStr, err)
+        if errors.Is(err, gorm.ErrRecordNotFound) {
+             c.JSON(http.StatusNotFound, gin.H{"error": "Listing not found"})
+             return
+        }
+         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get listing"})
+         return
+    }
+
+    c.JSON(http.StatusOK, listing)
+}
 
 // GetAllActiveListings handles GET /listings (Public)
 func (h *ListingHandler) GetAllActiveListings(c *gin.Context) {
@@ -203,4 +228,34 @@ func (h *ListingHandler) UpdateListing(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, listingInput) 
+}
+
+
+// DeleteListing handles DELETE /listings/{id} (Admin only)
+func (h *ListingHandler) DeleteListing(c *gin.Context) {
+    idStr := c.Param("id")
+    _, err := uuid.Parse(idStr)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid listing ID format"})
+        return
+    }
+
+    // invoke service layer to perform the delete logic (admin-specific)
+    if err := h.service.DeleteListing(idStr); err != nil {
+        log.Printf("Error deleting listing %s: %v", idStr, err)
+
+        if err.Error() == "unauthorized: insufficient permissions" {
+            c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+            return
+        }
+        if err.Error() == fmt.Sprintf("listing with id %s not found", idStr) {
+            c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+            return
+        }
+
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete listing"})
+        return
+    }
+
+    c.Status(http.StatusNoContent) // 204 No Content
 }

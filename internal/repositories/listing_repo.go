@@ -67,7 +67,7 @@ func (r *ListingRepository) GetByID(id string) (*models.Listing, error) {
 
 // Update: update fields in a listing
 func (r *ListingRepository) Update(listing *models.Listing) error {
-	return r.UpdateWithTx(r.DB, Listing)
+	return r.UpdateWithTx(r.DB, listing)
 }
 
 func (r *ListingRepository) UpdateWithTx(tx *gorm.DB, listing *models.Listing) error {

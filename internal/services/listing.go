@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/zekeriyyah/lujay-autocity/internal/models"
 	"github.com/zekeriyyah/lujay-autocity/internal/repositories"
+	"github.com/zekeriyyah/lujay-autocity/pkg/types"
 	"gorm.io/gorm"
 )
 
@@ -77,7 +78,6 @@ func (s *ListingService) GetAllListings() ([]*models.Listing, error) {
 	return s.repo.GetAll()
 }
 
-
 // GetActiveListings retrieves all listings with the status 'active'.
 func (s *ListingService) GetActiveListings() ([]*models.Listing, error) {
 	return s.repo.GetByStatus(models.ListingStatusActive)
@@ -132,4 +132,8 @@ func (s *ListingService) UpdateListing(listingToUpdate *models.Listing, authenti
 	}
 
 	return s.repo.Update(listingToUpdate)
+}
+
+func (s *ListingService) DeleteListing(id string) error {
+	return s.repo.Delete(id)
 }

@@ -55,7 +55,7 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 		sellerRoutes.Use(middleware.RBAC(types.RoleSeller))
 		{
 			sellerRoutes.POST("/listings", listingHandler.CreateListing)
-			sellerRoutes.GET("/listings", listingHandler.GetListingsBySeller)
+			sellerRoutes.GET("/listings/my", listingHandler.GetListingsBySeller)
 
 		}
 
@@ -68,7 +68,7 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 		adminRoutes.Use(middleware.RBAC(types.RoleSeller))
 
 		{
-			adminRoutes.GET("/listings", listingHandler.GetAllListingsForAdmin)
+			adminRoutes.GET("/listings/all", listingHandler.GetAllListingsForAdmin)
 		}
 	return r
 	}

@@ -11,6 +11,7 @@ import (
 
 type InspectionRepositoryInterface interface {
 	Create(inspection *models.Inspection) error
+	CreateWithTx(tx *gorm.DB, inspection *models.Inspection) error
 	GetByID(id string) (*models.Inspection, error) 
 	GetByStatus(status models.InspectionStatus) ([]*models.Inspection, error)
 	GetByListingID(listingID string) (*models.Inspection, error) 
@@ -27,6 +28,19 @@ type InspectionRepository struct {
 // NewInspectionRepository creates a new instance of InspectionRepository.
 func NewInspectionRepository(db *gorm.DB) *InspectionRepository {
 	return &InspectionRepository{DB: db}
+}
+
+// Create add a new inspection to db
+func (r *InspectionRepository) Create(inspection *models.Inspection) error {
+	return r.CreateWithTx(r.DB, inspection)
+}
+
+// CreateWithTx add a new inspection to db while in database transaction
+func (r *InspectionRepository) CreateWithTx(tx *gorm.DB, inspection *models.Inspection) error {
+	if err := tx.Create(inspection).Error; err != nil {
+		return fmt.Errorf("failed to create inspection: %w", err)
+	}
+	return nil
 }
 
 

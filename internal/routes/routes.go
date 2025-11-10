@@ -77,6 +77,7 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 			adminRoutes.GET("/inspections", inspectionHandler.GetInspections)
 			adminRoutes.GET("/inspections/:id", inspectionHandler.GetInspectionByID) 
 			adminRoutes.PUT("/inspections/:id", inspectionHandler.UpdateInspection)
+			adminRoutes.POST("/inspections", inspectionHandler.CreateInspection)
 
 		}
 

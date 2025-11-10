@@ -102,3 +102,61 @@ func (s *InspectionService) UpdateInspectionStatus(id string, newStatus models.I
 	}
 	return nil
 }
+
+
+
+// CreateInspection creates a new inspection report and conditionally updates the associated listing's status.
+
+func (s *InspectionService) CreateInspection(inspectionToCreate *models.Inspection, adminID uuid.UUID) (*models.Inspection, error) {
+	// check for valid listing id
+	if inspectionToCreate.ListingID == uuid.Nil {
+		return nil, fmt.Errorf("listing_id is required to create an inspection")
+	}
+
+	associatedListing, err := s.listingRepo.GetByID(inspectionToCreate.ListingID.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get associated listing for inspection: %w", err)
+	}
+
+	// switch to know if listing status should be updated or not
+	var newListingStatus models.ListingStatus
+	statusUpdateRequired := false
+
+	if associatedListing.Status == models.ListingStatusRejected {
+		newListingStatus = models.ListingStatusPending
+		statusUpdateRequired = true
+	} else {
+		statusUpdateRequired = false
+	}
+
+
+	// Use a database transaction to handle inspection creation and listing update together
+	err = s.repo.DB.Transaction(func(tx *gorm.DB) error {
+	
+		if err := s.repo.CreateWithTx(tx, inspectionToCreate); err != nil {
+			return fmt.Errorf("failed to create inspection within transaction: %w", err)
+		}
+
+		if statusUpdateRequired {
+		
+			listingToUpdate := &models.Listing{
+				ID:     associatedListing.ID, 
+				Status: newListingStatus,     
+			}
+
+			// Update the listing status 
+			if err := s.listingRepo.UpdateWithTx(tx, listingToUpdate); err != nil {
+				return fmt.Errorf("failed to update associated listing status within transaction: %w", err)
+			}
+		}
+
+		return nil
+	})
+
+	// 
+	if err != nil {
+		return nil, fmt.Errorf("failed to create inspection and potentially update associated listing: %w", err)
+	}
+
+	return inspectionToCreate, nil
+}

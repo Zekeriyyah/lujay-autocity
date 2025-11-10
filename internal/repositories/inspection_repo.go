@@ -12,6 +12,7 @@ import (
 type InspectionRepositoryInterface interface {
 	Create(inspection *models.Inspection) error
 	GetByID(id string) (*models.Inspection, error) 
+	GetByStatus(status models.InspectionStatus) ([]*models.Inspection, error)
 	GetByListingID(listingID string) (*models.Inspection, error) 
 	Update(inspection *models.Inspection) error
 	Delete(id string) error 
@@ -26,6 +27,18 @@ type InspectionRepository struct {
 func NewInspectionRepository(db *gorm.DB) *InspectionRepository {
 	return &InspectionRepository{db: db}
 }
+
+
+// GetByStatus retrieves inspections filtered by their status.
+func (r *InspectionRepository) GetByStatus(status models.InspectionStatus) ([]*models.Inspection, error) {
+	inspections := []*models.Inspection{}
+	// Preload related data (Listing, Inspector)
+	if err := r.db.Preload("Listing").Preload("Inspector").Where("status = ?", status).Find(&inspections).Error; err != nil {
+		return nil, fmt.Errorf("failed to get inspections by status: %w", err)
+	}
+	return inspections, nil
+}
+
 
 func (i *InspectionRepository) GetByListingID(listingID string) (*models.Inspection, error) {
 	parsedListingID, err := pkg.StringToUUID(listingID)

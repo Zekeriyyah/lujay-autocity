@@ -17,16 +17,18 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 	userRepo := repositories.NewUserRepository(database.DB)
 	listingRepo := repositories.NewListingRepository(database.DB)
 	vehicleRepo := repositories.NewVehicleRepository(database.DB)
+	inspectionRepo := repositories.NewInspectionRepository(database.DB)
 
 
 	// Initialize services
 	authService := services.NewAuthService(userRepo)
 	listingService := services.NewListingService(listingRepo, vehicleRepo, userRepo)
+	inspectionService := services.NewInspectionService(inspectionRepo)
 
 	// Initialize Handler
 	authHandler := handlers.NewAuthHandler(authService)
 	listingHandler := handlers.NewListingHandler(listingService)
-
+	inspectionHandler := handlers.NewInspectionHandler(inspectionService)
 
 
 
@@ -71,6 +73,8 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 			adminRoutes.GET("/listings/all", listingHandler.GetAllListingsForAdmin)
 			adminRoutes.GET("/listings/:id", listingHandler.GetListingByID) 
 			adminRoutes.DELETE("/listings/:id", listingHandler.DeleteListing)
+			
+			adminRoutes.GET("/inspections", inspectionHandler.GetInspections)
 
 		}
 

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -69,6 +70,7 @@ func RBAC(requiredRoles ...types.Role) gin.HandlerFunc{
 			}
 		}
 
+		log.Println(err)
 		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden: insufficient permission"})
 		c.Abort()
 	}) 

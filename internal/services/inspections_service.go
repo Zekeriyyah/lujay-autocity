@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/zekeriyyah/lujay-autocity/internal/models"
 	"github.com/zekeriyyah/lujay-autocity/internal/repositories"
+	email_helper "github.com/zekeriyyah/lujay-autocity/pkg/email"
 	"gorm.io/gorm"
 )
 
@@ -43,35 +44,36 @@ func (s *InspectionService) GetInspectionByID(id string) (*models.Inspection, er
 	return inspection, nil
 }
 
+
 // UpdateInspectionStatus updates the status of an inspection and triggers the associated listing status update.
 func (s *InspectionService) UpdateInspectionStatus(id string, newStatus models.InspectionStatus, adminID uuid.UUID) error {
-	
-	// get existing inspection by id
+
 	existingInspection, err := s.repo.GetByID(id)
 	if err != nil {
 		return err 
 	}
 
-	// retrieve the associated listing to update its status
+	// Retrieve the associated listing *WITH THE SELLER* to get the email address and update its status
 	associatedListing, err := s.listingRepo.GetByID(existingInspection.ListingID.String())
 	if err != nil {
-		return fmt.Errorf("failed to get associated listing for inspection %s: %w", id, err)
+		return fmt.Errorf("failed to get associated listing with seller for inspection %s: %w", id, err)
 	}
+	sellerEmail := associatedListing.Seller.Email 
+	listingTitle := associatedListing.Title       
 
-	
 	inspectionToUpdate := &models.Inspection{
 		ID:     existingInspection.ID, 
-		Status: newStatus,             
+		Status: newStatus,            
 	}
 
-	// handle listing and inspection update in transaction
+	// Handle listing and inspection update in a database transaction
 	err = s.repo.DB.Transaction(func(tx *gorm.DB) error {
-	
+
 		if err := s.repo.UpdateWithTx(tx, inspectionToUpdate); err != nil {
 			return fmt.Errorf("failed to update inspection status within transaction: %w", err)
 		}
 
-		// update listing status according to current inspection status
+		// Update the associated listing status according to the current inspection status
 		var newListingStatus models.ListingStatus
 		switch newStatus {
 		case models.InspectionStatusApproved:
@@ -84,7 +86,7 @@ func (s *InspectionService) UpdateInspectionStatus(id string, newStatus models.I
 
 		// Prepare the listing object for update
 		listingToUpdate := &models.Listing{
-			ID:     associatedListing.ID, 
+			ID:     associatedListing.ID,
 			Status: newListingStatus,    
 		}
 
@@ -95,11 +97,27 @@ func (s *InspectionService) UpdateInspectionStatus(id string, newStatus models.I
 		return nil
 	})
 
-	// handle error from transaction if any
+	// Handle error from the transaction
 	if err != nil {
-
 		return fmt.Errorf("failed to update inspection and associated listing: %w", err)
 	}
+
+	// send the email notification to the seller
+	var emailStatus string
+	switch newStatus {
+	case models.InspectionStatusApproved:
+		emailStatus = "approved"
+	case models.InspectionStatusRejected:
+		emailStatus = "rejected"
+	}
+
+	// Call the email helper function
+	if err := email_helper.SendListingStatusEmail(sellerEmail, emailStatus, listingTitle); err != nil {
+		fmt.Printf("Warning: Failed to send status email to seller %s for listing '%s' (status: %s): %v\n", sellerEmail, listingTitle, emailStatus, err)
+	} else {
+		fmt.Printf("Status email sent successfully to seller %s for listing '%s' (status: %s)\n", sellerEmail, listingTitle, emailStatus)
+	}
+
 	return nil
 }
 

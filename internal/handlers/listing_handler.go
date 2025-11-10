@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/zekeriyyah/lujay-autocity/internal/middleware"
 	"github.com/zekeriyyah/lujay-autocity/internal/models"
 	"github.com/zekeriyyah/lujay-autocity/internal/services"
@@ -142,4 +143,64 @@ func (h *ListingHandler) GetAllListingsForAdmin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, listings)
+}
+
+
+// UpdateListing handles PUT /listings/{id}
+func (h *ListingHandler) UpdateListing(c *gin.Context) {
+	
+	// Extract listing ID from the path parameter
+	idStr := c.Param("id")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid listing ID format"})
+		return
+	}
+
+	// Extract authenticated User ID and Role from Gin context
+	authUserID, ok := middleware.GetUserIDFromContext(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	userRole, ok := middleware.GetUserRoleFromContext(c)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User role not found in context"})
+		return
+	}
+
+	// Parse JSON request body into the Listing model
+	listingInput := models.Listing{}
+	if err := c.ShouldBindJSON(&listingInput); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON", "details": err.Error()})
+		return
+	}
+
+	// Validate the struct fields using the validator
+	if err := h.validator.Struct(listingInput); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Validation error: %v", err)})
+		return
+	}
+
+	listingInput.ID = id
+
+	if err := h.service.UpdateListing(&listingInput, authUserID, userRole); err != nil {
+		log.Printf("Error updating listing %s: %v", idStr, err)
+		
+		if err.Error() == "unauthorized: you can only update your own listings" ||
+		   err.Error() == "unauthorized: invalid role for update operation" {
+			c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+			return
+		}
+		if err.Error() == fmt.Sprintf("listing with id %s not found", idStr) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update listing"})
+		return
+	}
+
+	c.JSON(http.StatusOK, listingInput) 
 }

@@ -51,7 +51,7 @@ func (s *ListingService) CreateListingWithVehicle(listing *models.Listing, vehic
 			vehicle = existingVehicle 
 		}
 
-		// link the listing to the (newly created or existing) vehicle
+		// link the listing to the newly created or existing vehicle
 		listing.VehicleID = vehicle.ID
 		listing.Status = models.ListingStatusPending 
 
@@ -99,4 +99,37 @@ func (s *ListingService) GetListingsBySellerID(sellerID string) ([]*models.Listi
 // GetListingByID retrieves a specific listing by its ID.
 func (s *ListingService) GetListingByID(id string) (*models.Listing, error) {
 	return s.repo.GetByID(id)
+}
+
+
+func (s *ListingService) UpdateListing(listingToUpdate *models.Listing, authenticatedUserID uuid.UUID, role types.Role) error {
+	// Retrieve the existing listing from the database
+	existingListing, err := s.repo.GetByID(listingToUpdate.ID.String())
+	if err != nil {
+		return err
+	}
+
+	// Check authorization based on role
+	switch role {
+	case types.RoleSeller:
+		// Seller can only update their own listing
+		if existingListing.SellerID != authenticatedUserID {
+			return fmt.Errorf("unauthorized: you can only update your own listings")
+		}
+		// Seller cannot update sellerID, VehicleID and status
+		listingToUpdate.SellerID = existingListing.SellerID 
+		listingToUpdate.VehicleID = existingListing.VehicleID
+		listingToUpdate.Status = existingListing.Status 
+
+	case types.RoleAdmin:
+		// Admin can update any listing including status but not sellerID and VehicleID
+		listingToUpdate.SellerID = existingListing.SellerID 
+		listingToUpdate.VehicleID = existingListing.VehicleID 
+		
+
+	default:
+		return fmt.Errorf("unauthorized: invalid role for update operation")
+	}
+
+	return s.repo.Update(listingToUpdate)
 }

@@ -69,7 +69,18 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 
 		{
 			adminRoutes.GET("/listings/all", listingHandler.GetAllListingsForAdmin)
+			adminRoutes.GET("/listings/:id", listingHandler.GetListingByID) 
+			adminRoutes.DELETE("/listings/:id", listingHandler.DeleteListing)
+
 		}
+
+		// For both seller and admin 
+		protectedSellerOrAdmin := protected.Group("/")
+		protectedSellerOrAdmin.Use(middleware.RBAC(types.RoleSeller, types.RoleAdmin))
+		{
+			protectedSellerOrAdmin.PUT("/listings/:id", listingHandler.UpdateListing)
+		}
+
 	return r
 	}
 }

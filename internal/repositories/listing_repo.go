@@ -14,6 +14,7 @@ type ListingRepositoryInterface interface {
 	CreateWithTx(tx *gorm.DB, listing *models.Listing) error 
 	GetByID(id string) (*models.Listing, error) 
 	Update(listing *models.Listing) error
+	UpdateWithTx(tx *gorm.DB, listing *models.Listing) error 
 	Delete(id string) error 
 	GetBySellerID(sellerID string) ([]*models.Listing, error) 
 	
@@ -66,7 +67,11 @@ func (r *ListingRepository) GetByID(id string) (*models.Listing, error) {
 
 // Update: update fields in a listing
 func (r *ListingRepository) Update(listing *models.Listing) error {
-	result := r.DB.Save(listing)
+	return r.UpdateWithTx(r.DB, Listing)
+}
+
+func (r *ListingRepository) UpdateWithTx(tx *gorm.DB, listing *models.Listing) error {
+	result := tx.Save(listing)
 	if result.Error != nil {
 		return fmt.Errorf("failed to update listing: %w", result.Error)
 	}

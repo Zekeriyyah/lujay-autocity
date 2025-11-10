@@ -99,18 +99,18 @@ graph TB
 
 ## ✅ Features Implemented
 
-| Feature                                 | Status                                | Description                                                                                                              |
-| --------------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| ✅ **RESTful API**                      | Complete                              | Full CRUD for listings (`POST`, `GET`, `PUT`, `DELETE`)                                                                  |
-| ✅ **JWT Authentication**               | Complete                              | Secure token-based login and session management                                                                          |
-| ✅ **Role-Based Access Control (RBAC)** | Complete                              | Roles: `buyer`, `seller`, `admin` — enforced at endpoint level                                                           |
-| ✅ **PostgreSQL Database**              | Complete                              | UUID-based schema with relationships (User, Vehicle, Listing, Inspection, Transaction, Image)                            |
-| ✅ **Vehicle Vetting Workflow**         | Complete                              | Seller submits listing → Admin creates/updates inspection → Status auto-updates (`pending_review` → `active`/`rejected`) |
-| ✅ **File Upload Support**              | ✅ _Optional – Ready for Integration_ | `Image` model ready; Cloudinary/S3 integration can be added via `MediaService`                                           |
-| ✅ **Validation & Error Handling**      | Complete                              | Struct validation, HTTP status codes, descriptive errors                                                                 |
-| ✅ **Hexagonal Architecture**           | Complete                              | Clean separation: `models`, `repositories`, `services`, `handlers`, `routes`, `config`                                   |
-| ✅ **Testing Ready**                    | Complete                              | Full Postman collection provided                                                                                         |
-| ✅ **Code Quality**                     | Complete                              | `golangci-lint`, `Makefile`, structured `internal/` and `pkg/` directories                                               |
+| Feature                                 | Status           | Description                                                                                                              |
+| --------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| ✅ **RESTful API**                      | Complete         | Full CRUD for listings (`POST`, `GET`, `PUT`, `DELETE`)                                                                  |
+| ✅ **JWT Authentication**               | Complete         | Secure token-based login and session management                                                                          |
+| ✅ **Role-Based Access Control (RBAC)** | Complete         | Roles: `buyer`, `seller`, `admin` — enforced at endpoint level                                                           |
+| ✅ **PostgreSQL Database**              | Complete         | UUID-based schema with relationships (User, Vehicle, Listing, Inspection, Transaction, Image)                            |
+| ✅ **Vehicle Vetting Workflow**         | Complete         | Seller submits listing → Admin creates/updates inspection → Status auto-updates (`pending_review` → `active`/`rejected`) |
+| 🔄 **File Upload Support**              | 🔄 _In Progress_ | `Image` model and listing integration implemented; Cloudinary/S3 integration in progress `MediaService`                  |
+| ✅ **Validation & Error Handling**      | Complete         | Struct validation, HTTP status codes, descriptive errors                                                                 |
+| ✅ **Hexagonal Architecture**           | Complete         | Clean separation: `models`, `repositories`, `services`, `handlers`, `routes`, `config`                                   |
+| ✅ **Testing Ready**                    | Complete         | Full Postman collection provided                                                                                         |
+| ✅ **Code Quality**                     | Complete         | `golangci-lint`, `Makefile`, structured `internal/` and `pkg/` directories                                               |
 
 ---
 

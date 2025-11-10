@@ -65,7 +65,7 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 
 		// Admin-specific routes
 		adminRoutes := protected.Group("/")
-		adminRoutes.Use(middleware.RBAC(types.RoleSeller))
+		adminRoutes.Use(middleware.RBAC(types.RoleAdmin))
 
 		{
 			adminRoutes.GET("/listings/all", listingHandler.GetAllListingsForAdmin)

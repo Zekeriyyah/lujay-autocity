@@ -75,6 +75,7 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 			adminRoutes.DELETE("/listings/:id", listingHandler.DeleteListing)
 			
 			adminRoutes.GET("/inspections", inspectionHandler.GetInspections)
+			adminRoutes.GET("/inspections/:id", inspectionHandler.GetInspectionByID) 
 
 		}
 

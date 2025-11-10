@@ -37,8 +37,6 @@ func (s *ListingService) CreateListingWithVehicle(listing *models.Listing, vehic
 	err := s.repo.DB.Transaction(func(tx *gorm.DB) error { 
 		
 		// Check if vehicle of same vin exists to use it or create new one
-		existingVehicle := &models.Vehicle{}
-
 		existingVehicle, err := s.vehicleRepo.GetByVINWithTx(tx, vehicle.VIN)
 		if err != nil {
 			if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -72,4 +70,33 @@ func (s *ListingService) CreateListingWithVehicle(listing *models.Listing, vehic
 	}
 
 	return createdListing, nil
+}
+
+// GetAllListings retrieves all listings with the status 'active'.
+func (s *ListingService) GetAllListings() ([]*models.Listing, error) {
+	return s.repo.GetAll()
+}
+
+
+// GetActiveListings retrieves all listings with the status 'active'.
+func (s *ListingService) GetActiveListings() ([]*models.Listing, error) {
+	return s.repo.GetByStatus(models.ListingStatusActive)
+}
+
+
+// GetListingsByStatus retrieves listings filtered by a specific status
+func (s *ListingService) GetListingsByStatus(status models.ListingStatus) ([]*models.Listing, error) {
+	return s.repo.GetByStatus(status)
+}
+
+
+// GetListingsBySellerID retrieves all listings for a specific seller (used by Sellers).
+func (s *ListingService) GetListingsBySellerID(sellerID string) ([]*models.Listing, error) {
+	return s.repo.GetBySellerID(sellerID)
+}
+
+
+// GetListingByID retrieves a specific listing by its ID.
+func (s *ListingService) GetListingByID(id string) (*models.Listing, error) {
+	return s.repo.GetByID(id)
 }

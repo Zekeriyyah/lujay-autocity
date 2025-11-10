@@ -40,6 +40,7 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 	// Public routes (no auth required)
 	r.POST("/auth/register", authHandler.Register) 
 	r.POST("/auth/login", authHandler.Login)
+	r.GET("/listings", listingHandler.GetAllActiveListings)
 
 	// Protected routes (require authentication)
 	protected := r.Group("/")
@@ -54,9 +55,21 @@ func SetupRouter(r *gin.Engine, cfg *config.Config) *gin.Engine {
 		sellerRoutes.Use(middleware.RBAC(types.RoleSeller))
 		{
 			sellerRoutes.POST("/listings", listingHandler.CreateListing)
+			sellerRoutes.GET("/listings", listingHandler.GetListingsBySeller)
 
 		}
 
+		// Buyer-specific routes
+		buyerRoutes := protected.Group("/")
+		buyerRoutes.Use(middleware.RBAC(types.RoleBuyer))
+
+		// Admin-specific routes
+		adminRoutes := protected.Group("/")
+		adminRoutes.Use(middleware.RBAC(types.RoleSeller))
+
+		{
+			adminRoutes.GET("/listings", listingHandler.GetAllListingsForAdmin)
+		}
 	return r
 	}
 }

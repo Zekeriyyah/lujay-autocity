@@ -85,3 +85,61 @@ func (h *ListingHandler) CreateListing(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, createdListing)
 }
+
+
+// GetAllActiveListings handles GET /listings (Public)
+func (h *ListingHandler) GetAllActiveListings(c *gin.Context) {
+	listings, err := h.service.GetActiveListings()
+	if err != nil {
+		log.Printf("Error getting active listings: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get listings"})
+		return
+	}
+
+	c.JSON(http.StatusOK, listings)
+}
+
+// GetListingsBySeller handles GET /listings/my (Seller only)
+func (h *ListingHandler) GetListingsBySeller(c *gin.Context) {
+	
+	authSellerID, ok := middleware.GetUserIDFromContext(c)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Seller ID not found in context"})
+		return
+	}
+
+	// Get listings for the authenticated seller
+	listings, err := h.service.GetListingsBySellerID(authSellerID.String())
+	if err != nil {
+		log.Printf("Error getting listings for seller %s: %v", authSellerID.String(), err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get listings"})
+		return
+	}
+
+	c.JSON(http.StatusOK, listings)
+}
+
+// GetAllListingsForAdmin handles GET /listings/all (Admin only)
+func (h *ListingHandler) GetAllListingsForAdmin(c *gin.Context) {
+	
+	// Get query parameter for optional status filtering
+	statusParam := c.Query("status")
+	var listings []*models.Listing
+	var err error
+
+	if statusParam != "" {
+		status := models.ListingStatus(statusParam)
+		
+		listings, err = h.service.GetListingsByStatus(status)
+	} else {
+		listings, err = h.service.GetAllListings()
+	}
+
+	if err != nil {
+		log.Printf("Error getting all listings for admin: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get listings"})
+		return
+	}
+
+	c.JSON(http.StatusOK, listings)
+}

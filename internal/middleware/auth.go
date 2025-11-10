@@ -64,7 +64,7 @@ func RBAC(requiredRoles ...types.Role) gin.HandlerFunc{
 
 
 		for _, requiredRole := range requiredRoles {
-			log.Println(requiredRole, userRole)
+			log.Println(requiredRole, userRoleVal)
 			if userRole == requiredRole {
 				c.Next()
 				return

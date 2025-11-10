@@ -8,6 +8,95 @@ This service handles vehicle listings, user authentication, inspection workflows
 
 ---
 
+# 🏗️ System Architecture
+
+This diagram illustrates the core components and data flow of the AutoCity backend deployed on **Render**.
+
+```mermaid
+%% AutoCity System Architecture (Lujay Auto Assessment)
+graph TB
+    subgraph "Client Applications (React/TypeScript)"
+        BuyerFrontend["Buyer App (Browse/View)"]
+        SellerFrontend["Seller App (List/Manage)"]
+        AdminFrontend["Admin Dashboard (Vet/Listings)"]
+    end
+
+    subgraph "Render Web Service (Go/Gin)"
+        Gateway["API Gateway (Gin Engine)"]
+        Middleware["Middleware (JWT, RBAC)"]
+        ServiceGroup["Stateless Services"]
+
+        subgraph "Core Services"
+            AuthService["Auth Service"]
+            ListingService["Listing Service"]
+            InspectionService["Inspection Service"]
+            EmailService["Email Service (SMTP)"]
+        end
+    end
+
+    subgraph "Render Infrastructure"
+        subgraph "Service Instance"
+            GoApp["Go App (main.go)<br/>Listens on PORT (e.g., 10000)<br/>Bind to 0.0.0.0"]
+        end
+        subgraph "Managed Services"
+            RenderDB["PostgreSQL (Render Managed)"]
+            RenderRedis["Redis (Optional - Caching)"]
+        end
+    end
+
+    subgraph "External Services"
+        ImageStorage["Cloudinary (Image Storage)"]
+        SMTPServer["SMTP Server (e.g., Gmail)"]
+        RenderLoadBalancer["Render Load Balancer<br/>Terminates SSL<br/>Forwards to Service PORT"]
+    end
+
+    %% Client to Gateway via Load Balancer
+    BuyerFrontend --> RenderLoadBalancer
+    SellerFrontend --> RenderLoadBalancer
+    AdminFrontend --> RenderLoadBalancer
+
+    %% Load Balancer to Go App
+    RenderLoadBalancer --> GoApp
+
+    %% Go App Internal Flow
+    GoApp --> Gateway
+    Gateway --> Middleware
+    Middleware --> ServiceGroup
+    ServiceGroup --> AuthService
+    ServiceGroup --> ListingService
+    ServiceGroup --> InspectionService
+    ServiceGroup --> EmailService
+
+    %% Service Interactions with Databases/External
+    AuthService <--> RenderDB
+    ListingService <--> RenderDB
+    ListingService <--> ImageStorage
+    InspectionService <--> RenderDB
+    EmailService <--> SMTPServer
+
+    %% Optional Caching Interaction
+    ListingService -.-> RenderRedis
+    AuthService -.-> RenderRedis
+
+    %% Styling
+    classDef client fill:#f9d5bb,stroke:#333,stroke-width:2px
+    classDef gateway fill:#c9ebf9,stroke:#333,stroke-width:2px
+    classDef service fill:#d5f9c9,stroke:#333,stroke-width:2px
+    classDef external fill:#f9c9e3,stroke:#333,stroke-width:2px
+    classDef db fill:#e6e6e6,stroke:#333,stroke-width:2px
+    classDef render fill:#ffe066,stroke:#333,stroke-width:2px
+    classDef app fill:#75aadb,stroke:#333,stroke-width:2px
+
+    class BuyerFrontend,SellerFrontend,AdminFrontend client
+    class Gateway,Middleware gateway
+    class AuthService,ListingService,InspectionService,EmailService service
+    class ImageStorage,SMTPServer external
+    class RenderDB,RenderRedis db
+    class GoApp,RenderLoadBalancer render
+```
+
+---
+
 ## ✅ Features Implemented
 
 | Feature                                 | Status                                | Description                                                                                                              |

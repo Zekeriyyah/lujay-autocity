@@ -64,13 +64,12 @@ func RBAC(requiredRoles ...types.Role) gin.HandlerFunc{
 
 
 		for _, requiredRole := range requiredRoles {
+			log.Println(requiredRole)
 			if userRole == requiredRole {
 				c.Next()
 				return
 			}
 		}
-
-		log.Println(err)
 		c.JSON(http.StatusForbidden, gin.H{"error": "forbidden: insufficient permission"})
 		c.Abort()
 	}) 

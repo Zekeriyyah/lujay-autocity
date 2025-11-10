@@ -1,5 +1,3 @@
-Okay, here is the complete `README.md` content, with **all code snippets, command-line examples, and table definitions** properly enclosed in Markdown syntax (using triple backticks ```) as requested.
-
 ```markdown
 # 🚗 AutoCity Backend — Lujay Auto Technical Assessment
 

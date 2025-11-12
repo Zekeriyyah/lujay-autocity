@@ -108,19 +108,19 @@ func (i *InspectionRepository) Delete(id string) error {
 	return nil
 }
 
-func (r *InspectionRepository) GetByID(id string) (*models.Inspection, error) {
+func (r *InspectionRepository) GetByID(id string) (*models.InspectionFetchInput, error) {
 	parsedID, err := pkg.StringToUUID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	inspection := models.Inspection{}
+	inspectionInput := models.InspectionFetchInput{}
 
-	if err := r.DB.Preload("Listing").Preload("Inspector").First(&inspection, "id = ?", parsedID).Error; err != nil {
+	if err := r.DB.Preload("Listing").Preload("Inspector").First(&inspectionInput, "id = ?", parsedID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("inspection with id %s not found", id)
 		}
 		return nil, fmt.Errorf("failed to get inspection: %w", err)
 	}
-	return &inspection, nil
+	return &inspectionInput, nil
 }

@@ -67,16 +67,16 @@ func (s *InspectionService) GetInspectionByID(id string) (*models.Inspection, er
 // UpdateInspectionStatus updates the status of an inspection and triggers the associated listing status update.
 func (s *InspectionService) UpdateInspectionStatus(id string, newStatus models.InspectionStatus, adminID uuid.UUID) error {
 
-	existingInspectionInput, err := s.repo.GetByID(id)
+	existingInspection, err := s.repo.GetByID(id)
 	if err != nil {
 		return err 
 	}
 
-	// parse the input to Inspection model
-	existingInspection, err := existingInspectionInput.ParseInspectionInputToModel()
-	if err != nil {
-		return err
-	} 
+	// // parse the input to Inspection model
+	// existingInspection, err := existingInspectionInput.ParseInspectionInputToModel()
+	// if err != nil {
+	// 	return err
+	// } 
 
 
 	// Retrieve the associated listing *WITH THE SELLER* to get the email address and update its status

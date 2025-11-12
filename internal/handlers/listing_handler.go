@@ -257,5 +257,5 @@ func (h *ListingHandler) DeleteListing(c *gin.Context) {
         return
     }
 
-    c.Status(http.StatusNoContent) // 204 No Content
+    c.Status(http.StatusNoContent) 
 }

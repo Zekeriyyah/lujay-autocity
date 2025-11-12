@@ -119,7 +119,7 @@ func (s *ListingService) UpdateListing(listingToUpdate *models.Listing, authenti
 		// Seller cannot update sellerID, VehicleID and status
 		listingToUpdate.SellerID = existingListing.SellerID 
 		listingToUpdate.VehicleID = existingListing.VehicleID
-		listingToUpdate.Status = existingListing.Status 
+		listingToUpdate.Status = models.ListingStatusPending 
 
 	case types.RoleAdmin:
 		// Admin can update any listing including status but not sellerID and VehicleID

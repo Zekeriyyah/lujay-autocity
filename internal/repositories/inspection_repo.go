@@ -45,13 +45,14 @@ func (r *InspectionRepository) CreateWithTx(tx *gorm.DB, inspection *models.Insp
 
 
 // GetByStatus retrieves inspections filtered by their status.
-func (r *InspectionRepository) GetByStatus(status models.InspectionStatus) ([]*models.Inspection, error) {
-	inspections := []*models.Inspection{}
+func (r *InspectionRepository) GetByStatus(status models.InspectionStatus) ([]*models.InspectionFetchInput, error) {
+	inspectionsInput := []*models.InspectionFetchInput{}
 	// Preload related data (Listing, Inspector)
-	if err := r.DB.Preload("Listing").Preload("Inspector").Where("status = ?", status).Find(&inspections).Error; err != nil {
+	if err := r.DB.Preload("Listing").Preload("Inspector").Where("status = ?", status).Find(&inspectionsInput).Error; err != nil {
 		return nil, fmt.Errorf("failed to get inspections by status: %w", err)
 	}
-	return inspections, nil
+	
+	return inspectionsInput, nil
 }
 
 

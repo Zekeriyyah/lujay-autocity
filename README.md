@@ -316,7 +316,7 @@ erDiagram
 
 We’ve included a **Postman Collection** for easy testing. Import it into Postman:
 
-1. Download: [`AutoCity_Postman_Collection.json`](docs/AutoCity_Postman_Collection.json)
+1. Download: [`AutoCity_Postman_Collection.json`](dhttps://documenter.getpostman.com/view/29195129/2sB3WtsJYo)
 2. In Postman: `Import` → `Upload Files` → Select the JSON file.
 3. Set environment variables:
    - `BASE_URL`: `http://localhost:8080`

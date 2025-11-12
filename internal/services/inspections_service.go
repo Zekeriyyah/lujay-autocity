@@ -26,10 +26,22 @@ func NewInspectionService(inspectionRepo *repositories.InspectionRepository, lis
 // GetInspectionsByStatus retrieves inspections filtered by their status
 func (s *InspectionService) GetInspectionsByStatus(status models.InspectionStatus) ([]*models.Inspection, error) {
 	
-	inspections, err := s.repo.GetByStatus(status)
+	inspectionsInput, err := s.repo.GetByStatus(status)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get inspections by status '%s': %w", status, err)
 	}
+
+	inspections := []*models.Inspection{}
+
+	for _, input := range inspectionsInput {
+		inspection, err := input.ParseInspectionInputToModel()
+		if err != nil {
+			return nil, err
+		} 
+
+		inspections = append(inspections, inspection)
+	}
+	
 	return inspections, nil
 }
 

@@ -49,16 +49,16 @@ func (s *InspectionService) GetInspectionsByStatus(status models.InspectionStatu
 // GetInspectionByID retrieves a specific inspection by id
 func (s *InspectionService) GetInspectionByID(id string) (*models.Inspection, error) {
 
-	inspectionInput, err := s.repo.GetByID(id)
+	inspection, err := s.repo.GetByID(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get inspection with ID '%s': %w", id, err)
 	}
 
-	// parse the input to Inspection model
-	inspection, err := inspectionInput.ParseInspectionInputToModel()
-	if err != nil {
-		return inspection, err
-	} 
+	// // parse the input to Inspection model
+	// inspection, err := inspectionInput.ParseInspectionInputToModel()
+	// if err != nil {
+	// 	return inspection, err
+	// } 
 
 	return inspection, nil
 }

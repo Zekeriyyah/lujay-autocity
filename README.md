@@ -167,7 +167,7 @@ graph TB
 
 ## 📁 Project Structure
 
-````
+```
 
 autocity/
 ├── cmd/
@@ -192,6 +192,7 @@ autocity/
 
 
 > ✅ All code follows **Hexagonal Architecture** — business logic is decoupled from frameworks and databases.
+```
 
 ---
 
@@ -513,4 +514,3 @@ This implementation is **production-ready**, **well-documented**, and **fully al
 ---
 
 © 2025 Lujay Auto — AutoCity Backend | Built with ❤️ using Go
-````

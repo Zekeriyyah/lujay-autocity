@@ -87,10 +87,8 @@ func (s *InspectionService) UpdateInspectionStatus(id string, newStatus models.I
 	sellerEmail := associatedListing.Seller.Email 
 	listingTitle := associatedListing.Title       
 
-	inspectionToUpdate := &models.Inspection{
-		ID:     existingInspection.ID, 
-		Status: newStatus,            
-	}
+	inspectionToUpdate := existingInspection;
+	inspectionToUpdate.Status = newStatus
 
 	// Handle listing and inspection update in a database transaction
 	err = s.repo.DB.Transaction(func(tx *gorm.DB) error {

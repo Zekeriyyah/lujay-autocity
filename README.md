@@ -42,8 +42,6 @@ flowchart TD
 
 ---
 
----
-
 # 🏗️ System Architecture
 
 This diagram illustrates the core components and data flow of the AutoCity backend deployed on **Render**.

@@ -514,8 +514,4 @@ This implementation is **production-ready**, **well-documented**, and **fully al
 ---
 
 © 2025 Lujay Auto — AutoCity Backend | Built with ❤️ using Go
-
-```
-
-```
 ````

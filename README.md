@@ -167,30 +167,29 @@ graph TB
 
 ## 📁 Project Structure
 
-```
+````
 
 autocity/
 ├── cmd/
-│ └── autocity/ # Main application entry point
+│ ├── autocity/
+| └── migrateDB/
 ├── internal/
-│ ├── config/ # Environment configuration
-│ ├── models/ # Database entities (User, Listing, Inspection, etc.)
-│ ├── repositories/ # Database access layer (PostgreSQL via GORM)
-│ ├── services/ # Business logic layer (core workflows)
-│ ├── handlers/ # HTTP request handlers (Gin)
-│ ├── routes/ # Route definitions and middleware setup
-│ └── middleware/ # JWT Auth, RBAC, logging
+│ ├── config/
+│ ├── models/
+│ ├── repositories/
+│ ├── services/
+│ ├── handlers/
+│ ├── routes/
+│ └── middleware/
 ├── pkg/
-│ └── types/ # Shared types (Role, ListingStatus, InspectionStatus)
-├── migrations/ # SQL schema (if needed)
-├── .env.example # Environment template
-├── Makefile # Build, test, lint, run commands
-├── go.mod / go.sum # Go modules
-├── README.md # You're here! 🎉
-└── docs/
-└── AutoCity_Postman_Collection.json # Import into Postman
+│ └── types/
+├── migrations/
+├── .env.example
+├── Makefile
+├── go.mod / go.sum
+├── statics/
+└── README.md
 
-```
 
 > ✅ All code follows **Hexagonal Architecture** — business logic is decoupled from frameworks and databases.
 
@@ -287,7 +286,7 @@ erDiagram
         uuid listing_id FK
     }
 
-```
+````
 
 ---
 

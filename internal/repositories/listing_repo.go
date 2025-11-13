@@ -71,7 +71,7 @@ func (r *ListingRepository) Update(listing *models.Listing) error {
 }
 
 func (r *ListingRepository) UpdateWithTx(tx *gorm.DB, listing *models.Listing) error {
-	result := tx.Save(listing)
+	result := tx.Updates(listing)
 	if result.Error != nil {
 		return fmt.Errorf("failed to update listing: %w", result.Error)
 	}

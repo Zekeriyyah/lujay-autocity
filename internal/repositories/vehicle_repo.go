@@ -57,7 +57,7 @@ func(v *VehicleRepository) GetByID(id string)  (*models.Vehicle, error) {
 }
 
 func(v *VehicleRepository) Update(vehicle *models.Vehicle) error {
-	result := v.db.Save(vehicle)
+	result := v.db.Updates(vehicle)
 	if result.Error != nil {
 		return fmt.Errorf("failed to update vehicle: %w", result.Error)
 	}

@@ -8,7 +8,7 @@ This service handles vehicle listings, user authentication, inspection workflows
 
 ---
 
-# 🚗 AutoCity Vehicle Vetting WorkFlow
+## 🚗 AutoCity Vehicle Vetting WorkFlow
 
 This diagram outlines the core lifecycle of a vehicle listing on the AutoCity platform. It begins when a Seller creates a new listing, which is automatically set to pending_review. The Admin then reviews the listing and manages the inspection process. The final status of the listing (active or rejected) is determined by the outcome of the inspection.
 
@@ -42,7 +42,7 @@ flowchart TD
 
 ---
 
-# 🏗️ System Architecture
+## 🏗️ System Architecture
 
 This diagram illustrates the core components and data flow of the AutoCity backend deployed on **Render**.
 

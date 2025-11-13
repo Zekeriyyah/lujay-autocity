@@ -49,16 +49,16 @@ func (s *InspectionService) GetInspectionsByStatus(status models.InspectionStatu
 // GetInspectionByID retrieves a specific inspection by id
 func (s *InspectionService) GetInspectionByID(id string) (*models.Inspection, error) {
 
-	inspection, err := s.repo.GetByID(id)
+	rawInspection, err := s.repo.GetByID(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get inspection with ID '%s': %w", id, err)
 	}
 
-	// // parse the input to Inspection model
-	// inspection, err := inspectionInput.ParseInspectionInputToModel()
-	// if err != nil {
-	// 	return inspection, err
-	// } 
+	// parse the input to Inspection model
+	inspection, err := rawInspection.ParseInspectionInputToModel()
+	if err != nil {
+		return inspection, err
+	} 
 
 	return inspection, nil
 }
@@ -67,16 +67,16 @@ func (s *InspectionService) GetInspectionByID(id string) (*models.Inspection, er
 // UpdateInspectionStatus updates the status of an inspection and triggers the associated listing status update.
 func (s *InspectionService) UpdateInspectionStatus(id string, newStatus models.InspectionStatus, adminID uuid.UUID) error {
 
-	existingInspection, err := s.repo.GetByID(id)
+	rawInspection, err := s.repo.GetByID(id)
 	if err != nil {
 		return err 
 	}
 
-	// // parse the input to Inspection model
-	// existingInspection, err := existingInspectionInput.ParseInspectionInputToModel()
-	// if err != nil {
-	// 	return err
-	// } 
+	// parse the input to Inspection model
+	existingInspection, err := rawInspection.ParseInspectionInputToModel()
+	if err != nil {
+		return err
+	} 
 
 
 	// Retrieve the associated listing *WITH THE SELLER* to get the email address and update its status

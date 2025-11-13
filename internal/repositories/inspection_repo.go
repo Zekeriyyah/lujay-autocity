@@ -116,7 +116,7 @@ func (r *InspectionRepository) GetByID(id string) (*models.InspectionFetchInput,
 
 	rawInspection := &models.InspectionFetchInput{}
 
-	if err := r.DB.Preload("Listing").Preload("Inspector").First(&rawInspection, "id = ?", parsedID).Error; err != nil {
+	if err := r.DB.Table("inspections").Preload("Listing").Preload("Inspector").First(rawInspection, "id = ?", parsedID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("inspection with id %s not found", id)
 		}

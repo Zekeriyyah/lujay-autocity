@@ -70,7 +70,7 @@ graph TB
 
     subgraph "Render Infrastructure"
         subgraph "Service Instance"
-            GoApp["Go App (main.go)<br/>Listens on PORT specified in env variables]
+            GoApp["Go App (main.go)<br/>Listens on PORT specified in env variables"] <!-- Added missing " -->
         end
         subgraph "Managed Services"
             RenderDB["PostgreSQL (Render Managed)"]

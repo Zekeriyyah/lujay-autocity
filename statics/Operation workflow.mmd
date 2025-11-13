@@ -1,0 +1,24 @@
+flowchart TD
+    A[Seller: Create Listing] --> B(Listing Status: pending_review)
+    B --> C{Admin: Review Queue}
+    C --> D[Inspection Status: pending]
+    D --> E{Admin: Update Inspection}
+    E -->|Approve| F[Listing Status: active ✅ Visible to Buyers]
+    E -->|Reject| G[Listing Status: rejected ❌ Not Visible]
+    G --> H{Seller: Resubmit?}
+    H -->|Yes| B
+    H -->|No| I[(End - Listing Rejected)]
+    F --> J{Buyer: Purchase?}
+    J -->|Yes| K[(End - Listing Sold)]
+    J -->|No| F
+
+    %% Define styles
+    classDef action fill:#4CAF50,stroke:#2E7D32,color:white
+    classDef status fill:#2196F3,stroke:#0D47A1,color:white
+    classDef decision fill:#FF9800,stroke:#E65100,color:black
+    classDef endNode fill:#9E9E9E,stroke:#616161,color:white
+
+    %% Apply styles to nodes
+    class A,E,H,J action
+    class B,D,F,G status
+    class C,I,K endNode

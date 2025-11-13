@@ -8,6 +8,42 @@ This service handles vehicle listings, user authentication, inspection workflows
 
 ---
 
+# 🚗 AutoCity Vehicle Vetting WorkFlow
+
+This diagram outlines the core lifecycle of a vehicle listing on the AutoCity platform. It begins when a Seller creates a new listing, which is automatically set to pending_review. The Admin then reviews the listing and manages the inspection process. The final status of the listing (active or rejected) is determined by the outcome of the inspection.
+
+```mermaid
+flowchart TD
+    A[Seller: Create Listing] --> B(Listing Status: pending_review)
+    B --> C{Admin: Review Queue}
+    C --> D[Inspection Status: pending]
+    D --> E{Admin: Update Inspection}
+    E -->|Approve| F[Listing Status: active ✅ Visible to Buyers]
+    E -->|Reject| G[Listing Status: rejected ❌ Not Visible]
+    G --> H{Seller: Resubmit?}
+    H -->|Yes| B
+    H -->|No| I[(End - Listing Rejected)]
+    F --> J{Buyer: Purchase?}
+    J -->|Yes| K[(End - Listing Sold)]
+    J -->|No| F
+
+    %% Define styles
+    classDef action fill:#4CAF50,stroke:#2E7D32,color:white
+    classDef status fill:#2196F3,stroke:#0D47A1,color:white
+    classDef decision fill:#FF9800,stroke:#E65100,color:black
+    classDef endNode fill:#9E9E9E,stroke:#616161,color:white
+
+    %% Apply styles to nodes
+    class A,E,H,J action
+    class B,D,F,G status
+    class C,I,K endNode
+
+```
+
+---
+
+---
+
 # 🏗️ System Architecture
 
 This diagram illustrates the core components and data flow of the AutoCity backend deployed on **Render**.
@@ -36,7 +72,7 @@ graph TB
 
     subgraph "Render Infrastructure"
         subgraph "Service Instance"
-            GoApp["Go App (main.go)<br/>Listens on PORT (e.g., 10000)<br/>Bind to 0.0.0.0"]
+            GoApp["Go App (main.go)<br/>Listens on PORT specified in env variables]
         end
         subgraph "Managed Services"
             RenderDB["PostgreSQL (Render Managed)"]

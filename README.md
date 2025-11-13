@@ -286,7 +286,7 @@ erDiagram
         uuid listing_id FK
     }
 
-````
+```
 
 ---
 
@@ -518,3 +518,4 @@ This implementation is **production-ready**, **well-documented**, and **fully al
 ```
 
 ```
+````

@@ -48,7 +48,7 @@ func (r *InspectionRepository) CreateWithTx(tx *gorm.DB, inspection *models.Insp
 func (r *InspectionRepository) GetByStatus(status models.InspectionStatus) ([]*models.InspectionFetchInput, error) {
 	inspectionsInput := []*models.InspectionFetchInput{}
 	// Preload related data (Listing, Inspector)
-	if err := r.DB.Preload("Listing").Preload("Inspector").Where("status = ?", status).Find(&inspectionsInput).Error; err != nil {
+	if err := r.DB.Table("inspections").Preload("Listing").Preload("Inspector").Where("status = ?", status).Find(&inspectionsInput).Error; err != nil {
 		return nil, fmt.Errorf("failed to get inspections by status: %w", err)
 	}
 	
@@ -56,21 +56,21 @@ func (r *InspectionRepository) GetByStatus(status models.InspectionStatus) ([]*m
 }
 
 
-func (i *InspectionRepository) GetByListingID(listingID string) (*models.Inspection, error) {
+func (i *InspectionRepository) GetByListingID(listingID string) (*models.InspectionFetchInput, error) {
 	parsedListingID, err := pkg.StringToUUID(listingID)
 	if err != nil {
 		return nil, err
 	}
 
-	inspection := &models.Inspection{}
+	inspectionInput := &models.InspectionFetchInput{}
 
-	if err := i.DB.Preload("Listing").Preload("Inspector").First(inspection, "listing_id = ?", parsedListingID).Error; err != nil {
+	if err := i.DB.Table("inspections").Preload("Listing").Preload("Inspector").First(inspectionInput, "listing_id = ?", parsedListingID).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("inspection for listing ID %s not found", listingID)
 		}
 		return nil, fmt.Errorf("failed to get inspection by listing ID: %w", err)
 	}
-	return inspection, nil
+	return inspectionInput, nil
 }
 
 // Update updates an existing inspection.

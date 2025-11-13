@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/google/uuid"
 	"github.com/zekeriyyah/lujay-autocity/internal/models"
@@ -73,14 +72,11 @@ func (s *InspectionService) UpdateInspectionStatus(id string, newStatus models.I
 		return err 
 	}
 
-	log.Println("Raw Inspection: \n", rawInspection)
-
 	// parse the input to Inspection model
 	existingInspection, err := rawInspection.ParseInspectionInputToModel()
 	if err != nil {
 		return err
 	} 
-	log.Println("ExistingInspection: \n", existingInspection)
 	
 	// Retrieve the associated listing *WITH THE SELLER* to get the email address and update its status
 	associatedListing, err := s.listingRepo.GetByID(existingInspection.ListingID.String())
@@ -96,7 +92,6 @@ func (s *InspectionService) UpdateInspectionStatus(id string, newStatus models.I
 	}
 
 	
-	log.Printf("Inspection to update: \n%v\nSeller Email: %v\nListing Title: %v\n", inspectionToUpdate, sellerEmail, listingTitle)
 	// Handle listing and inspection update in a database transaction
 	err = s.repo.DB.Transaction(func(tx *gorm.DB) error {
 

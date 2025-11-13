@@ -81,7 +81,7 @@ func (i *InspectionRepository) Update(inspection *models.Inspection) error {
 // UpdateWithTx updates an existing inspection within an ongoing transaction
 func(i *InspectionRepository) UpdateWithTx(tx *gorm.DB, inspection *models.Inspection) error {
 	
-	result := tx.Save(inspection) 
+	result := tx.Updates(inspection) 
 	if result.Error != nil {
 		return fmt.Errorf("failed to update inspection: %w", result.Error)
 	}

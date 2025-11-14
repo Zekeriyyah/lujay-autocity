@@ -17,7 +17,7 @@ flowchart TD
     A[Seller: Create Listing] --> B(Listing Status: pending_review)
     B --> C{Admin: Review Queue}
     C --> D[Inspection Status: pending]
-    D --> E{Admin: Update Inspection}
+    D --> E{Admin: Update Inspection, Automatic mail sentto seller}
     E -->|Approve| F[Listing Status: active ✅ Visible to Buyers]
     E -->|Reject| G[Listing Status: rejected ❌ Not Visible]
     G --> H{Seller: Resubmit?}
